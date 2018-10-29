@@ -11,3 +11,9 @@ text = json.dumps({"0":{"sepal length (cm)": 4.9, "sepal width (cm)":3., "petal 
 headers = {'content-type': 'application/json', 'Accept-Charset': 'UTF-8'}
 r = requests.post(url, data=text, headers=headers)
 print(r, r.text)
+
+
+singletext =  json.dumps({"0": {"sepal length (cm)": 4.9, "sepal width (cm)":3., "petal length (cm)":1.4, "petal width (cm)":0.2}})
+
+r2 = requests.post(url, data=singletext, headers=headers)
+print(r2, r2.text)

@@ -21,6 +21,7 @@ def predict():
     # Read model from disk
     modelfile = 'modelfile.pkl'
     model = joblib.load(modelfile)
+    cutoffRound = 4
 
     # reads the received json
     jsonfile = request.get_json()
@@ -28,17 +29,30 @@ def predict():
     df = np.array(df[['sepal length (cm)', 'sepal width (cm)', 'petal length (cm)', 'petal width (cm)']])
 
     # Predicts
-    ypred = model.predict(df).tolist()
+    ypred = model.predict_proba(df).tolist()
 
     # Creates dictionary of predictions
     result = dict()
     for i in range(len(ypred)):
-        result[i] = ypred[i]
+        result[i] = [round(elem, cutoffRound) for elem in ypred[i]]
 
     # returns a json file
     #return pd.DataFrame.to_json(df)
     #return jsonify(ypred)
     return json.dumps(result)
+
+
+@app.route('/api/details', methods=['GET'])
+def details():
+    try:
+        lr = joblib.load("./modelfile.pkl")
+        training_set = joblib.load("./training_data.pkl")
+        labels = joblib.load("./training_labels.pkl")
+
+        return jsonify({"score": lr.score(training_set, labels), "coefficients": lr.coef_.tolist(), "intercepts": lr.intercept_.tolist()})
+    except (ValueError, TypeError) as e:
+        return jsonify("Error when getting details - {}".format(e))
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, port=80)
