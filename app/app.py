@@ -40,5 +40,18 @@ def predict():
     #return jsonify(ypred)
     return json.dumps(result)
 
+
+@app.route('/api/details', methods=['GET'])
+def details():
+    try:
+        lr = joblib.load("./modelfile.pkl")
+        training_set = joblib.load("./training_data.pkl")
+        labels = joblib.load("./training_labels.pkl")
+
+        return jsonify({"score": lr.score(training_set, labels), "coefficients": lr.coef_.tolist(), "intercepts": lr.intercept_.tolist()})
+    except (ValueError, TypeError) as e:
+        return jsonify("Error when getting details - {}".format(e))
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, port=80)
