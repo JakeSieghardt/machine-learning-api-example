@@ -1,33 +1,44 @@
 from flask import Flask, request, redirect, url_for, flash, jsonify
 import json, pickle
+import numpy as np
 import pandas as pd
+from sklearn import linear_model
+from sklearn.externals import joblib
+
 app = Flask(__name__)
 
 @app.route('/')
 def hello_world():
     return 'Hey, we have Flask in a Docker container!'
 
-@app.route('/api/makecalc/', methods=['POST'])
 
-def makecalc():
+@app.route('/api/predict', methods=['POST'])
+def predict():
     """
     Function run at each API call
-    No need to re-load the model
     """
+
+    # Read model from disk
+    modelfile = 'modelfile.pkl'
+    model = joblib.load(modelfile)
+
     # reads the received json
     jsonfile = request.get_json()
-    data = pd.read_json(json.dumps(jsonfile))
-    print(data)
+    df = pd.read_json(json.dumps(jsonfile),orient='index')
+    df = np.array(df[['sepal length (cm)', 'sepal width (cm)', 'petal length (cm)', 'petal width (cm)']])
 
-    res = dict()
-    ypred = model.predict(data)
+    # Predicts
+    ypred = model.predict(df).tolist()
+
+    # Creates dictionary of predictions
+    result = dict()
     for i in range(len(ypred)):
-        res[i] = ypred[i]
+        result[i] = ypred[i]
 
     # returns a json file
-    return jsonify(res)
+    #return pd.DataFrame.to_json(df)
+    #return jsonify(ypred)
+    return json.dumps(result)
 
 if __name__ == '__main__':
-    modelfile = 'modelfile.pkl'
-    model = pickle.load(open(modelfile, 'rb'))
     app.run(host='0.0.0.0', debug=True, port=80)
