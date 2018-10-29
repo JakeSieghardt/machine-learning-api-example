@@ -1,0 +1,9 @@
+version: '3'
+services:
+  flask-tutorial:
+    image: flask-tutorial
+    container_name: flask-tutorial
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./app:/app
