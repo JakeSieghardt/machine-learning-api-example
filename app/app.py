@@ -28,12 +28,15 @@ def predict():
                       'petal length (cm)', 'petal width (cm)']])
 
     # Predicts
-    ypred = model.predict_proba(df).tolist()
+    ypredprob = model.predict_proba(df).tolist()
+    ypred = model.predict(df).tolist()
 
     # Creates dictionary of predictions
     result = dict()
-    for i in range(len(ypred)):
-        result[i] = [round(elem, cutoffRound) for elem in ypred[i]]
+    for i in range(len(ypredprob)):
+        result[i] = {}
+        result[i]['class'] = ypred[i]
+        result[i]['prob'] = [round(elem, cutoffRound) for elem in ypredprob[i]]
 
     # returns a json file
 #    return pd.DataFrame.to_json(df)
